@@ -2,36 +2,15 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const images = [
-  {
-    id: 1,
-    src: "/gallery/1.webp",
-    alt: "Match 1",
-  },
-  {
-    id: 2,
-    src: "/gallery/2.webp",
-    alt: "Match 2",
-  },
-  {
-    id: 3,
-    src: "/gallery/3.webp",
-    alt: "Match 3",
-  },
-  {
-    id: 4,
-    src: "/gallery/4.webp",
-    alt: "Match 4",
-  },
-  {
-    id: 5,
-    src: "/gallery/5.webp",
-    alt: "Match 5",
-  },
-  {
-    id: 6,
-    src: "/gallery/6.webp",
-    alt: "Match 6",
-  },
+  { id: 1, src: "/gallery/1.webp", alt: "Match 1" },
+  { id: 2, src: "/gallery/2.webp", alt: "Match 2" },
+  { id: 3, src: "/gallery/3.webp", alt: "Match 3" },
+  { id: 4, src: "/gallery/4.webp", alt: "Match 4" },
+  { id: 5, src: "/gallery/5.webp", alt: "Match 5" },
+  { id: 6, src: "/gallery/6.webp", alt: "Match 6" },
+  { id: 7, src: "/gallery/7.webp", alt: "Match 7" },
+  { id: 8, src: "/gallery/8.webp", alt: "Match 8" },
+  { id: 9, src: "/gallery/9.webp", alt: "Match 9" },
 ];
 
 export default function Gallery() {
@@ -65,10 +44,7 @@ export default function Gallery() {
         viewport={{ once: true, amount: 0.1 }}
         variants={{
           hidden: { opacity: 0 },
-          visible: {
-            opacity: 1,
-            transition: { staggerChildren: 0.1 },
-          },
+          visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
         }}
         className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3"
       >
@@ -77,12 +53,7 @@ export default function Gallery() {
             key={image.id}
             variants={{
               hidden: { opacity: 0, y: 30, scale: 0.95 },
-              visible: {
-                opacity: 1,
-                y: 0,
-                scale: 1,
-                transition: { duration: 0.5 },
-              },
+              visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.5 } },
             }}
             whileHover={{ scale: 1.02, y: -4 }}
             onClick={() => setSelectedImage(image.id)}
