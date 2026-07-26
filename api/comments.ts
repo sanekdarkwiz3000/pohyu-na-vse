@@ -62,12 +62,8 @@ export default async function handler(req: any, res: any) {
 
     const comment = comments.find((c: any) => c.id === id);
     
-    // Проверяем: либо пароль саньки, либо свой коммент
-    if (password === ADMIN_PASSWORD) {
-      // Санёк может удалить любой коммент
-    } else if (comment && comment.userId === userId) {
-      // Пользователь может удалить свой коммент
-    } else {
+    // Проверка: либо правильный пароль, либо свой коммент (userId совпадает)
+    if (password !== ADMIN_PASSWORD && (!comment || comment.userId !== userId)) {
       return res.status(403).json({ 
         error: "Сорян но система комментов тут немного кривая, что бы удалить коммент обратитесь к саньке ^^" 
       });
