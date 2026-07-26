@@ -23,10 +23,9 @@ export default function Comments() {
   const [nickname, setNickname] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
-  const [showPassword, setShowPassword] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [password, setPassword] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
-  const [deleteError, setDeleteError] = useState("");
   const userId = getUserId();
 
   const fetchComments = useCallback(async () => {
@@ -71,8 +70,7 @@ export default function Comments() {
 
   const handleDeleteClick = (id: number) => {
     setDeleteId(id);
-    setShowPassword(true);
-    setDeleteError("");
+    setShowDeleteModal(true);
     setPassword("");
   };
 
@@ -89,16 +87,11 @@ export default function Comments() {
           userId: userId 
         }),
       });
-      const data = await res.json();
 
       if (res.ok) {
         setComments((prev) => prev.filter((c) => c.id !== deleteId));
-        setShowPassword(false);
+        setShowDeleteModal(false);
         setDeleteId(null);
-        setPassword("");
-        setDeleteError("");
-      } else {
-        setDeleteError(data.error);
       }
     } catch (err) {
       console.error(err);
@@ -179,15 +172,15 @@ export default function Comments() {
         <p className="text-center text-zinc-500">Пока нет комментариев. Будь первым!</p>
       )}
 
-      {/* Окно пароля */}
+      {/* Окно удаления */}
       <AnimatePresence>
-        {showPassword && (
+        {showDeleteModal && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-8"
-            onClick={() => { setShowPassword(false); setDeleteError(""); }}
+            onClick={() => setShowDeleteModal(false)}
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
@@ -196,7 +189,9 @@ export default function Comments() {
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-md rounded-2xl border border-white/10 bg-[#121212] p-8"
             >
-              <h4 className="mb-4 text-xl font-bold">Введите пароль для удаления</h4>
+              <p className="mb-6 text-center text-amber-400">
+                Сорян но система комментов тут немного кривая, что бы удалить коммент обратитесь к саньке ^^
+              </p>
               <input
                 type="password"
                 placeholder="Пароль"
@@ -204,9 +199,6 @@ export default function Comments() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="mb-4 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-zinc-500 outline-none transition focus:border-violet-500/40"
               />
-              {deleteError && (
-                <p className="mb-4 text-sm text-amber-400">{deleteError}</p>
-              )}
               <div className="flex gap-3">
                 <button
                   onClick={handleDeleteConfirm}
@@ -215,7 +207,7 @@ export default function Comments() {
                   Удалить
                 </button>
                 <button
-                  onClick={() => { setShowPassword(false); setDeleteError(""); }}
+                  onClick={() => setShowDeleteModal(false)}
                   className="rounded-xl border border-white/10 px-6 py-2 text-zinc-400 transition hover:bg-white/5"
                 >
                   Отмена
