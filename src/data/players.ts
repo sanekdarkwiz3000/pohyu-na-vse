@@ -13,7 +13,7 @@ export interface Player {
 export const players: Player[] = [
   {
     id: 1,
-    nickname: "rejector拒绝者",
+    nickname: "санёк аниме пацан",
     role: "Carry • Position 5",
     rank: "Divine III",
     status: "LEGACY",
@@ -47,7 +47,7 @@ export const players: Player[] = [
     nickname: "диман течис",
     role: "Player",
     rank: "Immortal",
-    mmr: "6400 MMR",
+    mmr: "6500 MMR",
     status: "ACTIVE",
     steam: "https://steamcommunity.com/profiles/76561199178845320/",
     dotabuff: "https://www.dotabuff.com/players/1218579592",
