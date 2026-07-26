@@ -1,5 +1,3 @@
-import { Redis } from "@upstash/redis";
-
 interface Comment {
   id: number;
   nickname: string;
@@ -7,16 +5,30 @@ interface Comment {
   date: string;
 }
 
-const redis = Redis.fromEnv();
 const COMMENTS_KEY = "pohyu-comments";
 
 export default async function handler(req: any, res: any) {
+  const KV_URL = process.env.KV_URL;
+  const KV_TOKEN = process.env.KV_REST_API_TOKEN;
+
+  if (!KV_URL || !KV_TOKEN) {
+    return res.status(500).json({ error: "KV not configured" });
+  }
+
+  const headers = {
+    Authorization: `Bearer ${KV_TOKEN}`,
+    "Content-Type": "application/json",
+  };
+
+  // GET
   if (req.method === "GET") {
-    const data = await redis.get<string>(COMMENTS_KEY);
-    const comments: Comment[] = data ? JSON.parse(data) : [];
+    const response = await fetch(`${KV_URL}/get/${COMMENTS_KEY}`, { headers });
+    const data = await response.json();
+    const comments: Comment[] = data.result ? JSON.parse(data.result) : [];
     return res.status(200).json(comments);
   }
 
+  // POST
   if (req.method === "POST") {
     const { nickname, message } = req.body;
     if (!nickname || !message) {
@@ -30,20 +42,36 @@ export default async function handler(req: any, res: any) {
       date: new Date().toLocaleString("ru-RU"),
     };
 
-    const data = await redis.get<string>(COMMENTS_KEY);
-    const comments: Comment[] = data ? JSON.parse(data) : [];
+    // Получаем текущие
+    const getRes = await fetch(`${KV_URL}/get/${COMMENTS_KEY}`, { headers });
+    const getData = await getRes.json();
+    const comments: Comment[] = getData.result ? JSON.parse(getData.result) : [];
     comments.unshift(newComment);
-    await redis.set(COMMENTS_KEY, JSON.stringify(comments));
+
+    // Сохраняем
+    await fetch(`${KV_URL}/set/${COMMENTS_KEY}`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(JSON.stringify(comments)),
+    });
 
     return res.status(201).json(newComment);
   }
 
+  // DELETE
   if (req.method === "DELETE") {
     const { id } = req.body;
-    const data = await redis.get<string>(COMMENTS_KEY);
-    const comments: Comment[] = data ? JSON.parse(data) : [];
+    const getRes = await fetch(`${KV_URL}/get/${COMMENTS_KEY}`, { headers });
+    const getData = await getRes.json();
+    const comments: Comment[] = getData.result ? JSON.parse(getData.result) : [];
     const filtered = comments.filter((c) => c.id !== id);
-    await redis.set(COMMENTS_KEY, JSON.stringify(filtered));
+
+    await fetch(`${KV_URL}/set/${COMMENTS_KEY}`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(JSON.stringify(filtered)),
+    });
+
     return res.status(200).json({ success: true });
   }
 
