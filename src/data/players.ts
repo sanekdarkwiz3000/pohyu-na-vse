@@ -44,10 +44,13 @@ export const players: Player[] = [
   },
   {
     id: 8,
-    nickname: "диман",
+    nickname: "диман течис",
     role: "Player",
-    rank: "",
+    rank: "Immortal",
+    mmr: "6400 MMR",
     status: "ACTIVE",
+    steam: "https://steamcommunity.com/profiles/76561199178845320/",
+    dotabuff: "https://www.dotabuff.com/players/1218579592",
     avatar: "/players/diman.webp",
   },
   {
