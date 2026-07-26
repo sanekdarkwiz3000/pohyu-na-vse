@@ -31,6 +31,7 @@ export default async function handler(req: any, res: any) {
       nickname: nickname.slice(0, 30),
       message: message.slice(0, 500),
       date: new Date().toLocaleString("ru-RU"),
+      userId: req.body.userId || "",
     });
 
     await fetch(`${KV_URL}/set/pohyu-comments`, {
@@ -46,7 +47,9 @@ export default async function handler(req: any, res: any) {
   }
 
   if (req.method === "DELETE") {
-    const { id } = req.body;
+    const { id, password, userId } = req.body;
+    const ADMIN_PASSWORD = "sany2012$$";
+
     const getRes = await fetch(`${KV_URL}/get/pohyu-comments`, {
       headers: { Authorization: `Bearer ${KV_TOKEN}` },
     });
@@ -56,6 +59,20 @@ export default async function handler(req: any, res: any) {
       const parsed = JSON.parse(getData.result);
       comments = Array.isArray(parsed) ? parsed : [];
     }
+
+    const comment = comments.find((c: any) => c.id === id);
+    
+    // Проверяем: либо пароль саньки, либо свой коммент
+    if (password === ADMIN_PASSWORD) {
+      // Санёк может удалить любой коммент
+    } else if (comment && comment.userId === userId) {
+      // Пользователь может удалить свой коммент
+    } else {
+      return res.status(403).json({ 
+        error: "Сорян но система комментов тут немного кривая, что бы удалить коммент обратитесь к саньке ^^" 
+      });
+    }
+
     comments = comments.filter((c: any) => c.id !== id);
 
     await fetch(`${KV_URL}/set/pohyu-comments`, {
