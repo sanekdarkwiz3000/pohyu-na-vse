@@ -24,6 +24,8 @@ export default function PlayerCard({ player }: Props) {
             className={`inline-block rounded-full px-3 py-1 text-xs font-semibold tracking-wider ${
               player.status === "ACTIVE"
                 ? "bg-green-500/20 text-green-300"
+                : player.status === "LEGEND"
+                ? "bg-amber-500/20 text-amber-300"
                 : "bg-zinc-700 text-zinc-300"
             }`}
           >
@@ -44,7 +46,7 @@ export default function PlayerCard({ player }: Props) {
                 Rank
               </p>
               <h3 className="mt-2 text-xl font-bold">
-                {player.rank}
+                {player.rank || "—"}
               </h3>
             </div>
 
@@ -71,9 +73,7 @@ export default function PlayerCard({ player }: Props) {
                 whileTap={{ scale: 0.95 }}
                 className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-400 transition-colors hover:bg-red-500/20 hover:text-red-300"
               >
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                </svg>
+                <img src="/dotabuff.png" alt="Dotabuff" className="h-5 w-5" />
                 Dotabuff
               </motion.a>
             )}
@@ -87,9 +87,7 @@ export default function PlayerCard({ player }: Props) {
                 whileTap={{ scale: 0.95 }}
                 className="flex items-center gap-2 rounded-lg border border-blue-500/30 bg-blue-500/10 px-4 py-2 text-sm font-semibold text-blue-400 transition-colors hover:bg-blue-500/20 hover:text-blue-300"
               >
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
-                </svg>
+                <img src="/steam.png" alt="Steam" className="h-5 w-5" />
                 Steam
               </motion.a>
             )}
@@ -97,18 +95,18 @@ export default function PlayerCard({ player }: Props) {
         </div>
 
         <div className="h-48 w-40 overflow-hidden rounded-2xl">
-  {player.avatar ? (
-    <img
-      src={player.avatar}
-      alt={player.nickname}
-      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-    />
-  ) : (
-    <div className="flex h-full w-full items-center justify-center border border-dashed border-white/20 text-zinc-500">
-      ART
-    </div>
-  )}
-</div>
+          {player.avatar ? (
+            <img
+              src={player.avatar}
+              alt={player.nickname}
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center border border-dashed border-white/20 text-zinc-500">
+              ART
+            </div>
+          )}
+        </div>
       </div>
     </motion.div>
   );
