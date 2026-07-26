@@ -107,4 +107,12 @@ export const players: Player[] = [
     status: "LEGEND",
     avatar: "/players/jackson.webp",
   },
+  {
+    id: 11,
+    nickname: "VladosМикрочел",
+    role: "Legend",
+    rank: "Herald III",
+    status: "LEGEND",
+    avatar: "/players/vlados.webp",
+  },
 ];
