@@ -11,6 +11,9 @@ const images = [
   { id: 7, src: "/gallery/7.webp", alt: "Match 7" },
   { id: 8, src: "/gallery/8.webp", alt: "Match 8" },
   { id: 9, src: "/gallery/9.webp", alt: "Match 9" },
+  { id: 10, src: "/gallery/10.webp", alt: "Match 10" },
+  { id: 11, src: "/gallery/11.webp", alt: "Match 11" },
+  { id: 12, src: "/gallery/12.webp", alt: "Match 12" },
 ];
 
 export default function Gallery() {
