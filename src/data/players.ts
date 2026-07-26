@@ -95,7 +95,7 @@ export const players: Player[] = [
     id: 6,
     nickname: "GOLD COBRA",
     role: "Legend",
-    rank: "IMMORTAL",
+    rank: "Immortal",
     status: "LEGEND",
     avatar: "/players/goldcobra.webp",
   },
