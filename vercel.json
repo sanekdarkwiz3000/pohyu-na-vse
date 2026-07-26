@@ -1,0 +1,8 @@
+{
+  "functions": {
+    "api/comments.ts": {
+      "memory": 128,
+      "maxDuration": 10
+    }
+  }
+}

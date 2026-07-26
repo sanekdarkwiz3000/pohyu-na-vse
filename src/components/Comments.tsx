@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Comment {
@@ -8,41 +8,61 @@ interface Comment {
   date: string;
 }
 
-const STORAGE_KEY = "pohyu-na-vse-comments";
-
 export default function Comments() {
-  const [comments, setComments] = useState<Comment[]>(() => {
-    // Загружаем при первой инициализации
-    const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : [];
-  });
-  
+  const [comments, setComments] = useState<Comment[]>([]);
   const [nickname, setNickname] = useState("");
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  // Сохраняем при каждом изменении comments
+  const fetchComments = useCallback(async () => {
+    try {
+      const res = await fetch("/api/comments");
+      const data = await res.json();
+      setComments(data);
+    } catch (err) {
+      console.error("Failed to load comments:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(comments));
-  }, [comments]);
+    fetchComments();
+  }, [fetchComments]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nickname.trim() || !message.trim()) return;
 
-    const newComment: Comment = {
-      id: Date.now(),
-      nickname: nickname.trim(),
-      message: message.trim(),
-      date: new Date().toLocaleString("ru-RU"),
-    };
-
-    setComments((prev) => [newComment, ...prev]);
-    setNickname("");
-    setMessage("");
+    try {
+      const res = await fetch("/api/comments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nickname: nickname.trim(),
+          message: message.trim(),
+        }),
+      });
+      const newComment = await res.json();
+      setComments((prev) => [newComment, ...prev]);
+      setNickname("");
+      setMessage("");
+    } catch (err) {
+      console.error("Failed to post comment:", err);
+    }
   };
 
-  const handleDelete = (id: number) => {
-    setComments((prev) => prev.filter((c) => c.id !== id));
+  const handleDelete = async (id: number) => {
+    try {
+      await fetch("/api/comments", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      setComments((prev) => prev.filter((c) => c.id !== id));
+    } catch (err) {
+      console.error("Failed to delete comment:", err);
+    }
   };
 
   return (
@@ -54,7 +74,6 @@ export default function Comments() {
         COMMENTS
       </h3>
 
-      {/* Форма */}
       <motion.form
         onSubmit={handleSubmit}
         initial={{ opacity: 0, y: 30 }}
@@ -89,35 +108,38 @@ export default function Comments() {
         </motion.button>
       </motion.form>
 
-      {/* Комментарии */}
-      <AnimatePresence>
-        {comments.map((comment) => (
-          <motion.div
-            key={comment.id}
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.4 }}
-            className="group mb-4 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-lg"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <span className="font-bold text-violet-400">{comment.nickname}</span>
-              <div className="flex items-center gap-4">
-                <span className="text-xs text-zinc-500">{comment.date}</span>
-                <button
-                  onClick={() => handleDelete(comment.id)}
-                  className="text-xs text-zinc-600 opacity-0 transition hover:text-red-400 group-hover:opacity-100"
-                >
-                  Удалить
-                </button>
+      {loading ? (
+        <p className="text-center text-zinc-500">Загрузка...</p>
+      ) : (
+        <AnimatePresence>
+          {comments.map((comment) => (
+            <motion.div
+              key={comment.id}
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.4 }}
+              className="group mb-4 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-lg"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-bold text-violet-400">{comment.nickname}</span>
+                <div className="flex items-center gap-4">
+                  <span className="text-xs text-zinc-500">{comment.date}</span>
+                  <button
+                    onClick={() => handleDelete(comment.id)}
+                    className="text-xs text-zinc-600 opacity-0 transition hover:text-red-400 group-hover:opacity-100"
+                  >
+                    Удалить
+                  </button>
+                </div>
               </div>
-            </div>
-            <p className="text-zinc-300">{comment.message}</p>
-          </motion.div>
-        ))}
-      </AnimatePresence>
+              <p className="text-zinc-300">{comment.message}</p>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      )}
 
-      {comments.length === 0 && (
+      {!loading && comments.length === 0 && (
         <p className="text-center text-zinc-500">Пока нет комментариев. Будь первым!</p>
       )}
     </section>
