@@ -13,7 +13,7 @@ export interface Player {
 export const players: Player[] = [
   {
     id: 1,
-    nickname: "санёк аниме пацан",
+    nickname: "rejector拒绝者",
     role: "Carry • Position 5",
     rank: "Divine III",
     status: "LEGACY",
@@ -44,8 +44,8 @@ export const players: Player[] = [
   },
   {
     id: 8,
-    nickname: "диман течис",
-    role: "Player",
+    nickname: "диман",
+    role: "Mid • Position 4",
     rank: "Immortal",
     mmr: "6500 MMR",
     status: "ACTIVE",
@@ -102,7 +102,7 @@ export const players: Player[] = [
   {
     id: 7,
     nickname: "jackson_18",
-    role: "Legend",
+    role: "Legendary Coach • Работает из тени",
     rank: "",
     status: "LEGEND",
     avatar: "/players/jackson.webp",
