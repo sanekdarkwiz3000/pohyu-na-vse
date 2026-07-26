@@ -10,9 +10,7 @@ export default function Navbar() {
   }, []);
 
   const scrollTo = (id: string) => {
-    console.log("Кликнули:", id);
     const el = document.getElementById(id);
-    console.log("Нашли элемент:", el);
     if (el) {
       el.scrollIntoView({ behavior: "smooth" });
     }
@@ -49,6 +47,9 @@ export default function Navbar() {
           </button>
           <button onClick={() => scrollTo("gallery")} className="transition hover:text-white">
             Gallery
+          </button>
+          <button onClick={() => scrollTo("comments")} className="transition hover:text-white">
+            Comments
           </button>
         </nav>
       </div>
