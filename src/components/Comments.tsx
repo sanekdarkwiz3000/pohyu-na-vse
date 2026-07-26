@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Comment {
@@ -8,10 +8,22 @@ interface Comment {
   date: string;
 }
 
+const STORAGE_KEY = "pohyu-na-vse-comments";
+
 export default function Comments() {
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [comments, setComments] = useState<Comment[]>(() => {
+    // Загружаем при первой инициализации
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return saved ? JSON.parse(saved) : [];
+  });
+  
   const [nickname, setNickname] = useState("");
   const [message, setMessage] = useState("");
+
+  // Сохраняем при каждом изменении comments
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(comments));
+  }, [comments]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,9 +36,13 @@ export default function Comments() {
       date: new Date().toLocaleString("ru-RU"),
     };
 
-    setComments([newComment, ...comments]);
+    setComments((prev) => [newComment, ...prev]);
     setNickname("");
     setMessage("");
+  };
+
+  const handleDelete = (id: number) => {
+    setComments((prev) => prev.filter((c) => c.id !== id));
   };
 
   return (
@@ -52,6 +68,7 @@ export default function Comments() {
           placeholder="Твой ник"
           value={nickname}
           onChange={(e) => setNickname(e.target.value)}
+          maxLength={30}
           className="mb-4 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-zinc-500 outline-none transition focus:border-violet-500/40"
         />
         <textarea
@@ -59,6 +76,7 @@ export default function Comments() {
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           rows={3}
+          maxLength={500}
           className="mb-4 w-full resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-zinc-500 outline-none transition focus:border-violet-500/40"
         />
         <motion.button
@@ -80,11 +98,19 @@ export default function Comments() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.4 }}
-            className="mb-4 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-lg"
+            className="group mb-4 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-lg"
           >
             <div className="flex items-center justify-between mb-2">
               <span className="font-bold text-violet-400">{comment.nickname}</span>
-              <span className="text-xs text-zinc-500">{comment.date}</span>
+              <div className="flex items-center gap-4">
+                <span className="text-xs text-zinc-500">{comment.date}</span>
+                <button
+                  onClick={() => handleDelete(comment.id)}
+                  className="text-xs text-zinc-600 opacity-0 transition hover:text-red-400 group-hover:opacity-100"
+                >
+                  Удалить
+                </button>
+              </div>
             </div>
             <p className="text-zinc-300">{comment.message}</p>
           </motion.div>
