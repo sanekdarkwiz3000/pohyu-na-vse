@@ -18,9 +18,10 @@ export default function Comments() {
     try {
       const res = await fetch("/api/comments");
       const data = await res.json();
-      setComments(data);
+      setComments(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Failed to load comments:", err);
+      setComments([]);
     } finally {
       setLoading(false);
     }
