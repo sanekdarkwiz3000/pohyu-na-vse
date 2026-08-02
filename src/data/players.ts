@@ -55,11 +55,14 @@ export const players: Player[] = [
   },
   {
     id: 9,
-    nickname: "какойтопацан_1",
+    nickname: "мира",
     role: "Player",
-    rank: "",
+    rank: "IMMORTAL",
+    mmr: "5800",
+    steam: "https://steamcommunity.com/profiles/76561199114250871/"
+    dotabuff: "https://www.dotabuff.com/players/1153985143"
     status: "ACTIVE",
-    avatar: "/players/pacan1.webp",
+    avatar: "/players/mira.webp",
   },
   {
     id: 10,
