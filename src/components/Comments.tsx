@@ -190,7 +190,7 @@ export default function Comments() {
               className="w-full max-w-md rounded-2xl border border-white/10 bg-[#121212] p-8"
             >
               <p className="mb-6 text-center text-amber-400">
-                Сорян но система комментов тут немного кривая, что бы удалить коммент обратитесь к саньке ^^
+                Я НЕ МОГУ СДЕЛАТЬ ЕБАНЫЕ КОММЕНТАРИИ НОРМАЛЬНО
               </p>
               <input
                 type="password"
