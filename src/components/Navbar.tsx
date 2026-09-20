@@ -29,7 +29,7 @@ export default function Navbar() {
           onClick={() => scrollTo("hero")}
           className="text-xl font-black tracking-[0.4em] transition hover:text-violet-400"
         >
-          PHV
+          PHB RISEN FROM THE ASHES
         </button>
 
         <nav className="flex gap-10 text-sm uppercase tracking-[0.2em] text-zinc-400">
