@@ -14,8 +14,8 @@ export const players: Player[] = [
   {
     id: 1,
     nickname: "sanekdarkwiz",
-    role: "Carry • Position 5",
-    rank: "Divine V"
+    role: "Carry",
+    rank: "Divine V",
     status: "ACTIVE",
     steam: "https://steamcommunity.com/id/execxxxxx/",
     dotabuff: "https://www.dotabuff.com/players/1241116790",
@@ -26,7 +26,7 @@ export const players: Player[] = [
     nickname: "mindset",
     role: "Mid",
     rank: "Immortal",
-    mmr: "6800 MMR",
+    mmr: "8000 MMR",
     status: "ACTIVE",
     steam: "https://steamcommunity.com/profiles/76561199065697001",
     dotabuff: "https://www.dotabuff.com/players/1105431273",
@@ -70,6 +70,8 @@ export const players: Player[] = [
     role: "Carry • Offlane",
     rank: "Immortal",
     status: "ACTIVE",
+    steam: "https://steamcommunity.com/profiles/76561199559423122",
+    dotabuff: "https://www.dotabuff.com/players/1599157394",
     avatar: "/players/wasted.webp",
   },
   {
