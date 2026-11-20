@@ -13,10 +13,10 @@ export interface Player {
 export const players: Player[] = [
   {
     id: 1,
-    nickname: "sanekdarkwiz",
+    nickname: "Évanescence",
     role: "Carry",
     rank: "Divine V",
-    status: "ACTIVE",
+    status: "LEGACY",
     steam: "https://steamcommunity.com/id/execxxxxx/",
     dotabuff: "https://www.dotabuff.com/players/1241116790",
     avatar: "/players/rejector.webp",
@@ -48,7 +48,7 @@ export const players: Player[] = [
     role: "Carry • Position 5",
     rank: "Immortal",
     mmr: "6000 MMR",
-    status: "ACTIVE",
+    status: "LEGACY",
     steam: "https://steamcommunity.com/profiles/76561199663004874",
     dotabuff: "https://www.dotabuff.com/players/1702739146",
     avatar: "/players/coddexx.webp",

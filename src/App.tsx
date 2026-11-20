@@ -1,20 +1,23 @@
-import AnimatedBackground from "./components/AnimatedBackground";
+import { MotionConfig } from "framer-motion";
 import Navbar from "./components/Navbar";
 import Hero from "./sections/Hero/Hero";
 import Roster from "./sections/Roster/Roster";
+import BattleCup from "./sections/BattleCup/BattleCup";
 import Gallery from "./sections/Gallery/Gallery";
 import Comments from "./components/Comments";
 
 function App() {
   return (
-    <>
-      <AnimatedBackground />
+    <MotionConfig reducedMotion="user">
       <Navbar />
-      <Hero />
-      <Roster />
-      <Gallery />
-      <Comments />
-    </>
+      <main>
+        <Hero />
+        <Roster />
+        <BattleCup />
+        <Gallery />
+        <Comments />
+      </main>
+    </MotionConfig>
   );
 }
 

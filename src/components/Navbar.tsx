@@ -1,56 +1,95 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+const links = [
+  { id: "hero", label: "Home" },
+  { id: "roster", label: "Roster" },
+  { id: "legends", label: "Legends" },
+  { id: "legacy", label: "Legacy" },
+  { id: "battle-cup", label: "Battle Cup" },
+  { id: "gallery", label: "Gallery" },
+  { id: "comments", label: "Comments" },
+];
 
 export default function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [current, setCurrent] = useState("hero");
+  const toggle = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 80);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+    const sections = links.flatMap(({ id }) => {
+      const section = document.getElementById(id);
+      return section ? [section] : [];
+    });
+    let frame = 0;
 
-  const scrollTo = (id: string) => {
-    const el = document.getElementById(id);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+    const updateCurrent = () => {
+      frame = 0;
+      const offset = Math.max(96, Math.min(window.innerHeight * 0.38, 360));
+      if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2) {
+        setCurrent(sections.at(-1)?.id ?? "hero");
+        return;
+      }
+      const section = sections.findLast((item) => item.getBoundingClientRect().top <= offset);
+      setCurrent(section?.id ?? "hero");
+    };
+
+    const scheduleUpdate = () => {
+      if (!frame) frame = window.requestAnimationFrame(updateCurrent);
+    };
+
+    scheduleUpdate();
+    window.addEventListener("scroll", scheduleUpdate, { passive: true });
+    window.addEventListener("resize", scheduleUpdate);
+    return () => {
+      window.removeEventListener("scroll", scheduleUpdate);
+      window.removeEventListener("resize", scheduleUpdate);
+      window.cancelAnimationFrame(frame);
+    };
+  }, []);
 
   return (
     <header
-      className={`fixed left-0 top-0 z-50 w-full transition-all duration-500 ${
-        scrolled
-          ? "border-b border-white/10 bg-black/40 backdrop-blur-xl"
-          : "bg-transparent"
-      }`}
+      className="site-header"
+      onKeyDown={(event) => {
+        if (open && event.key === "Escape") {
+          setOpen(false);
+          toggle.current?.focus();
+        }
+      }}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+      }}
     >
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-8">
+      <div className="header-inner">
+        <a className="brand" href="#hero" onClick={() => setOpen(false)}>
+          <strong>PHB</strong>
+          <span>RISEN FROM THE ASHES</span>
+        </a>
+
         <button
-          onClick={() => scrollTo("hero")}
-          className="text-xl font-black tracking-[0.4em] transition hover:text-violet-400"
+          ref={toggle}
+          type="button"
+          className="menu-toggle"
+          aria-expanded={open}
+          aria-controls="section-nav"
+          onClick={() => setOpen((value) => !value)}
         >
-          PHB RISEN FROM THE ASHES
+          Menu
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" width="18" height="18">
+            <path d="M4 8h16M4 16h16" />
+          </svg>
         </button>
 
-        <nav className="flex gap-10 text-sm uppercase tracking-[0.2em] text-zinc-400">
-          <button onClick={() => scrollTo("hero")} className="transition hover:text-white">
-            Home
-          </button>
-          <button onClick={() => scrollTo("roster")} className="transition hover:text-white">
-            Roster
-          </button>
-          <button onClick={() => scrollTo("legends")} className="transition hover:text-amber-400">
-            Legends
-          </button>
-          <button onClick={() => scrollTo("legacy")} className="transition hover:text-white">
-            Legacy
-          </button>
-          <button onClick={() => scrollTo("gallery")} className="transition hover:text-white">
-            Gallery
-          </button>
-          <button onClick={() => scrollTo("comments")} className="transition hover:text-white">
-            Comments
-          </button>
+        <nav id="section-nav" className="site-nav" aria-label="Main" data-open={open}>
+          <ul>
+            {links.map(({ id, label }) => (
+              <li key={id}>
+                <a href={"#" + id} aria-current={current === id ? "location" : undefined} onClick={() => setOpen(false)}>
+                  {label}
+                </a>
+              </li>
+            ))}
+          </ul>
         </nav>
       </div>
     </header>

@@ -1,5 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import SectionHeading from "./SectionHeading";
+import { revealOnScroll, revealTransition } from "../motion";
 
 interface Comment {
   id: number;
@@ -9,214 +11,199 @@ interface Comment {
   userId: string;
 }
 
-const getUserId = (): string => {
-  let userId = localStorage.getItem("pohyu-user-id");
-  if (!userId) {
-    userId = "user_" + Date.now() + "_" + Math.random().toString(36).slice(2, 10);
-    localStorage.setItem("pohyu-user-id", userId);
-  }
+function getUserId() {
+  const key = "pohyu-user-id";
+  const existing = localStorage.getItem(key);
+  if (existing) return existing;
+
+  const userId = "user_" + Date.now() + "_" + Math.random().toString(36).slice(2, 10);
+  localStorage.setItem(key, userId);
   return userId;
-};
+}
 
 export default function Comments() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [nickname, setNickname] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState(false);
   const [password, setPassword] = useState("");
   const [deleteId, setDeleteId] = useState<number | null>(null);
-  const userId = getUserId();
-
-  const fetchComments = useCallback(async () => {
-    try {
-      const res = await fetch("/api/comments");
-      const data = await res.json();
-      setComments(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error(err);
-      setComments([]);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+  const deleteDialog = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
-    fetchComments();
-  }, [fetchComments]);
+    const controller = new AbortController();
+    async function fetchComments() {
+      try {
+        const response = await fetch("/api/comments", { signal: controller.signal });
+        if (!response.ok) throw new Error("Unable to load comments");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!nickname.trim() || !message.trim()) return;
+        const data = await response.json();
+        if (!Array.isArray(data)) throw new Error("Invalid comments response");
+        if (!controller.signal.aborted) setComments(data);
+      } catch {
+        if (!controller.signal.aborted) setLoadError(true);
+      } finally {
+        if (!controller.signal.aborted) setLoading(false);
+      }
+    }
+
+    void fetchComments();
+    return () => controller.abort();
+  }, []);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (sending || loading || !nickname.trim() || !message.trim()) return;
+
+    setSending(true);
+    setSendError(false);
 
     try {
-      const res = await fetch("/api/comments", {
+      const response = await fetch("/api/comments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           nickname: nickname.trim(),
           message: message.trim(),
-          userId: userId,
+          userId: getUserId(),
         }),
       });
-      const newComment = await res.json();
-      setComments((prev) => [newComment, ...prev]);
+      if (!response.ok) throw new Error("Unable to post comment");
+
+      const newComment = await response.json() as Comment;
+      setComments((previous) => [newComment, ...previous]);
       setNickname("");
       setMessage("");
-    } catch (err) {
-      console.error(err);
+    } catch {
+      setSendError(true);
+    } finally {
+      setSending(false);
     }
   };
 
   const handleDeleteClick = (id: number) => {
     setDeleteId(id);
-    setShowDeleteModal(true);
     setPassword("");
+    setDeleteError("");
+    deleteDialog.current?.showModal();
   };
 
-  const handleDeleteConfirm = async () => {
-    if (!deleteId) return;
+  const handleDeleteConfirm = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (deleteId === null || deleting) return;
+
+    setDeleting(true);
+    setDeleteError("");
 
     try {
-      const res = await fetch("/api/comments", {
+      const response = await fetch("/api/comments", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          id: deleteId, 
-          password: password,
-          userId: userId 
-        }),
+        body: JSON.stringify({ id: deleteId, password, userId: getUserId() }),
       });
 
-      if (res.ok) {
-        setComments((prev) => prev.filter((c) => c.id !== deleteId));
-        setShowDeleteModal(false);
-        setDeleteId(null);
+      if (response.status === 403) {
+        setDeleteError("Удалить комментарий может его автор или администратор.");
+        return;
       }
-    } catch (err) {
-      console.error(err);
+      if (!response.ok) throw new Error("Unable to delete comment");
+
+      deleteDialog.current?.close();
+      setComments((previous) => previous.filter((comment) => comment.id !== deleteId));
+    } catch {
+      setDeleteError("Не удалось удалить комментарий. Попробуй ещё раз.");
+    } finally {
+      setDeleting(false);
     }
   };
 
   return (
-    <section id="comments" className="mx-auto max-w-3xl px-8 py-32">
-      <h2 className="mb-4 text-sm uppercase tracking-[0.5em] text-violet-400">Chat</h2>
-      <h3 className="mb-16 text-6xl font-black">COMMENTS</h3>
+    <section id="comments" aria-labelledby="comments-title" tabIndex={-1} className="section-shell comments-section">
+      <SectionHeading id="comments-title" label="Chat" title="Comments" />
 
-      <motion.form
-        onSubmit={handleSubmit}
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.6 }}
-        className="mb-12 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-lg"
-      >
+      <motion.form {...revealOnScroll} onSubmit={handleSubmit} className="comment-form">
+        <label className="form-label" htmlFor="comment-nickname">Твой ник</label>
         <input
-          type="text"
-          placeholder="Твой ник"
+          id="comment-nickname"
           value={nickname}
-          onChange={(e) => setNickname(e.target.value)}
+          onChange={(event) => setNickname(event.target.value)}
           maxLength={30}
-          className="mb-4 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-zinc-500 outline-none transition focus:border-violet-500/40"
+          required
+          readOnly={sending}
         />
+        <label className="form-label" htmlFor="comment-message">Твой комментарий</label>
         <textarea
-          placeholder="Твой комментарий..."
+          id="comment-message"
           value={message}
-          onChange={(e) => setMessage(e.target.value)}
+          onChange={(event) => setMessage(event.target.value)}
           rows={3}
           maxLength={500}
-          className="mb-4 w-full resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-zinc-500 outline-none transition focus:border-violet-500/40"
+          required
+          readOnly={sending}
         />
-        <motion.button
-          type="submit"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="rounded-xl border border-violet-500/40 px-8 py-3 font-semibold transition hover:bg-violet-500/10"
-        >
-          Отправить
-        </motion.button>
+        <button type="submit" disabled={sending || loading || !nickname.trim() || !message.trim()} className="primary-button">
+          {sending ? "Отправляю…" : "Отправить"}
+        </button>
+        {sendError && <p className="form-error" role="alert">Не удалось отправить комментарий. Попробуй ещё раз.</p>}
       </motion.form>
 
-      {loading ? (
-        <p className="text-center text-zinc-500">Загрузка...</p>
-      ) : (
-        <AnimatePresence>
+      {loading && <p className="comment-feedback" role="status">Загрузка…</p>}
+      {loadError && <p className="comment-feedback" role="status">Не удалось загрузить комментарии. Обнови страницу, чтобы попробовать ещё раз.</p>}
+      {!loading && !loadError && comments.length === 0 && (
+        <p className="comment-feedback">Пока нет комментариев. Будь первым!</p>
+      )}
+
+      <ul className="comment-list">
+        <AnimatePresence initial={false}>
           {comments.map((comment) => (
-            <motion.div
+            <motion.li
               key={comment.id}
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.4 }}
-              className="group mb-4 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-lg"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={revealTransition}
+              className="comment-item"
             >
-              <div className="flex items-center justify-between mb-2">
-                <span className="font-bold text-violet-400">{comment.nickname}</span>
-                <div className="flex items-center gap-4">
-                  <span className="text-xs text-zinc-500">{comment.date}</span>
-                  <button
-                    onClick={() => handleDeleteClick(comment.id)}
-                    className="text-xs text-zinc-600 opacity-0 transition hover:text-red-400 group-hover:opacity-100"
-                  >
-                    Удалить
-                  </button>
-                </div>
+              <div className="comment-meta">
+                <strong>{comment.nickname}</strong>
+                <span>{comment.date}</span>
+                <button type="button" disabled={deleting} onClick={() => handleDeleteClick(comment.id)}>Удалить</button>
               </div>
-              <p className="text-zinc-300">{comment.message}</p>
-            </motion.div>
+              <p>{comment.message}</p>
+            </motion.li>
           ))}
         </AnimatePresence>
-      )}
+      </ul>
 
-      {!loading && comments.length === 0 && (
-        <p className="text-center text-zinc-500">Пока нет комментариев. Будь первым!</p>
-      )}
-
-      {/* Окно удаления */}
-      <AnimatePresence>
-        {showDeleteModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-8"
-            onClick={() => setShowDeleteModal(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-md rounded-2xl border border-white/10 bg-[#121212] p-8"
-            >
-              <p className="mb-6 text-center text-amber-400">
-                Я НЕ МОГУ СДЕЛАТЬ ЕБАНЫЕ КОММЕНТАРИИ НОРМАЛЬНО
-              </p>
-              <input
-                type="password"
-                placeholder="Пароль"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="mb-4 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-zinc-500 outline-none transition focus:border-violet-500/40"
-              />
-              <div className="flex gap-3">
-                <button
-                  onClick={handleDeleteConfirm}
-                  className="rounded-xl border border-red-500/40 px-6 py-2 text-red-400 transition hover:bg-red-500/10"
-                >
-                  Удалить
-                </button>
-                <button
-                  onClick={() => setShowDeleteModal(false)}
-                  className="rounded-xl border border-white/10 px-6 py-2 text-zinc-400 transition hover:bg-white/5"
-                >
-                  Отмена
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <dialog
+        ref={deleteDialog}
+        className="site-dialog comment-dialog"
+        aria-labelledby="delete-title"
+        onClick={(event) => {
+          if (event.target === event.currentTarget) event.currentTarget.close();
+        }}
+      >
+        <form onSubmit={handleDeleteConfirm} className="comment-form">
+          <h3 id="delete-title">Удалить комментарий?</h3>
+          <label className="form-label" htmlFor="comment-password">Пароль администратора (если комментарий чужой)</label>
+          <input
+            id="comment-password"
+            type="password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+          />
+          {deleteError && <p className="form-error" role="alert">{deleteError}</p>}
+          <div className="dialog-actions">
+            <button type="submit" disabled={deleting}>{deleting ? "Удаляю…" : "Удалить"}</button>
+            <button type="button" onClick={() => deleteDialog.current?.close()}>Отмена</button>
+          </div>
+        </form>
+      </dialog>
     </section>
   );
 }

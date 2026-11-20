@@ -1,62 +1,38 @@
 import { motion } from "framer-motion";
+import { revealTransition } from "../../motion";
+
 export default function Hero() {
   return (
-    <section
-      id="hero"
-      className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#090909]"
-    >
-      <div className="absolute h-[700px] w-[700px] rounded-full bg-violet-600/20 blur-[180px]" />
-
+    <section id="hero" aria-labelledby="hero-title" tabIndex={-1} className="hero">
       <motion.div
-        initial={{ opacity: 0, y: 80 }}
+        initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{
-          duration: 1,
-          ease: "easeOut",
-        }}
-        className="z-10 flex flex-col items-center"
+        transition={revealTransition}
+        className="hero-layout"
       >
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="mb-4 text-sm tracking-[0.6em] uppercase text-zinc-500"
-        >
-          EST. 2026
-        </motion.p>
-
-        <motion.h1
-          initial={{ scale: 0.92, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{
-            delay: 0.2,
-            duration: 0.8,
-          }}
-          className="bg-gradient-to-r from-white via-zinc-200 to-violet-400 bg-clip-text text-center text-7xl font-black text-transparent md:text-9xl"
-        >
-          POHYU HA BCE
-        </motion.h1>
-
-        <motion.button
-          onClick={() => {
-            document.getElementById("roster")?.scrollIntoView({
-              behavior: "smooth",
-            });
-          }}
-          whileHover={{
-            scale: 1.05,
-            boxShadow: "0 0 40px rgba(139,92,246,.5)",
-          }}
-          whileTap={{
-            scale: 0.97,
-          }}
-          transition={{
-            duration: 0.2,
-          }}
-          className="mt-12 rounded-xl border border-violet-500/40 px-10 py-4 text-lg font-semibold"
-        >
-          ENTER
-        </motion.button>
+        <div className="hero-content">
+          <p className="hero-date">EST. 2026</p>
+          <h1 id="hero-title">POHYU HA BCE</h1>
+          <div className="hero-actions">
+            <a className="primary-button" href="#roster">
+              ENTER
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" width="18" height="18">
+                <path d="M12 5v14m-5-5 5 5 5-5" />
+              </svg>
+            </a>
+            <a className="primary-button hero-battle-link" href="#battle-cup">
+              BATTLE CUP
+            </a>
+          </div>
+        </div>
+        <img
+          className="hero-poster"
+          src="/team-poster.jpg"
+          width="1440"
+          height="960"
+          alt="PHB team lifting a trophy onstage"
+          fetchPriority="high"
+        />
       </motion.div>
     </section>
   );
