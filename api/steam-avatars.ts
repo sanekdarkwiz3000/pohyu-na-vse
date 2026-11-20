@@ -1,5 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { players } from "../src/data/players.ts";
+import { players } from "../src/data/players.js";
 
 const steamOrigin = "https://steamcommunity.com";
 const steamAvatarUrl = /^https:\/\/(?:avatars(?:\.(?:akamai|fastly|cloudflare))?\.steamstatic\.com|steamcdn-a\.akamaihd\.net)\//i;
