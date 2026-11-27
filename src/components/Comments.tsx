@@ -124,7 +124,7 @@ export default function Comments() {
 
   return (
     <section id="comments" aria-labelledby="comments-title" tabIndex={-1} className="section-shell comments-section">
-      <SectionHeading id="comments-title" label="Chat" title="Comments" />
+      <SectionHeading id="comments-title" label="Chat" title="Comments" index="06" />
 
       <motion.form {...revealOnScroll} onSubmit={handleSubmit} className="comment-form">
         <label className="form-label" htmlFor="comment-nickname">Твой ник</label>
@@ -146,9 +146,15 @@ export default function Comments() {
           required
           readOnly={sending}
         />
-        <button type="submit" disabled={sending || loading || !nickname.trim() || !message.trim()} className="primary-button">
-          {sending ? "Отправляю…" : "Отправить"}
-        </button>
+        <div className="comment-form-footer">
+          <span className="char-count" aria-hidden="true">{message.length} / 500</span>
+          <button type="submit" disabled={sending || loading || !nickname.trim() || !message.trim()} className="primary-button">
+            <span>{sending ? "Отправляю…" : "Отправить"}</span>
+            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" width="17" height="17">
+              <path d="M5 12h14m-5-5 5 5-5 5" />
+            </svg>
+          </button>
+        </div>
         {sendError && <p className="form-error" role="alert">Не удалось отправить комментарий. Попробуй ещё раз.</p>}
       </motion.form>
 
@@ -163,13 +169,15 @@ export default function Comments() {
           {comments.map((comment) => (
             <motion.li
               key={comment.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
+              layout
+              initial={{ opacity: 0, y: 16, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, x: -24, transition: { duration: 0.25 } }}
               transition={revealTransition}
               className="comment-item"
             >
               <div className="comment-meta">
+                <span className="comment-avatar" aria-hidden="true">{[...comment.nickname.trim()][0]?.toUpperCase() ?? "?"}</span>
                 <strong>{comment.nickname}</strong>
                 <span>{comment.date}</span>
                 <button type="button" disabled={deleting} onClick={() => handleDeleteClick(comment.id)}>Удалить</button>

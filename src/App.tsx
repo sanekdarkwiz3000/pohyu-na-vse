@@ -5,6 +5,7 @@ import Roster from "./sections/Roster/Roster";
 import BattleCup from "./sections/BattleCup/BattleCup";
 import Gallery from "./sections/Gallery/Gallery";
 import Comments from "./components/Comments";
+import Footer from "./components/Footer";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Gallery />
         <Comments />
       </main>
+      <Footer />
     </MotionConfig>
   );
 }
