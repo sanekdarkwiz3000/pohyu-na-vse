@@ -102,35 +102,37 @@ main {
   box-shadow: 0 0 12px var(--accent-glow);
 }
 
+.pointer-glow-layer {
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+
+/* Painted once; only its transform changes as the pointer moves. */
 .pointer-glow {
+  position: absolute;
+  top: -300px;
+  left: -300px;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(154 108 245 / 0.08), transparent 60%);
+  opacity: 0;
+  transition: opacity 600ms ease;
+  will-change: transform;
+}
+
+/* Static grain, drawn behind the content so it never forces repaints on top. */
+.grain {
   position: fixed;
   z-index: 0;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(
-    600px circle at var(--pointer-x, 50%) var(--pointer-y, -20%),
-    rgb(154 108 245 / 0.07),
-    transparent 60%
-  );
-}
-
-.grain {
-  position: fixed;
-  z-index: 60;
-  inset: -50%;
-  pointer-events: none;
-  opacity: 0.05;
+  opacity: 0.04;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
-  animation: grain 1.2s steps(6) infinite;
-}
-
-@keyframes grain {
-  0% { transform: translate(0, 0); }
-  20% { transform: translate(-3%, 2%); }
-  40% { transform: translate(2%, -3%); }
-  60% { transform: translate(-2%, -1%); }
-  80% { transform: translate(3%, 3%); }
-  100% { transform: translate(0, 0); }
 }
 
 /* ───────────────────────── Header ───────────────────────── */
@@ -164,10 +166,10 @@ main {
 
 .site-header[data-scrolled="true"] .header-inner {
   border-color: var(--line);
-  background: rgb(14 10 20 / 0.62);
+  background: rgb(14 10 20 / 0.78);
   box-shadow: 0 10px 40px rgb(0 0 0 / 0.35), inset 0 1px 0 rgb(255 255 255 / 0.05);
-  backdrop-filter: blur(18px) saturate(1.4);
-  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .brand {
@@ -402,9 +404,7 @@ main {
 .orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
   opacity: 0.55;
-  will-change: transform;
 }
 
 .orb-violet {
@@ -521,7 +521,6 @@ main {
 .hero-letter {
   display: inline-block;
   transform-origin: 50% 100%;
-  will-change: transform, opacity, filter;
 }
 
 

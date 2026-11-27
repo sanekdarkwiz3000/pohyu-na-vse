@@ -12,8 +12,8 @@ const stats = [
 
 function fadeUp(delay: number) {
   return {
-    initial: { opacity: 0, y: 24, filter: "blur(6px)" },
-    animate: { opacity: 1, y: 0, filter: "blur(0px)" },
+    initial: { opacity: 0, y: 24 },
+    animate: { opacity: 1, y: 0 },
     transition: { duration: 0.9, ease: easeOut, delay },
   };
 }

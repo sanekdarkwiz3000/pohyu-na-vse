@@ -5,6 +5,8 @@ import { easeOut, staggeredReveal } from "../../motion";
 
 const images = Array.from({ length: 16 }, (_, index) => ({
   src: "/gallery/" + (index + 1) + ".webp",
+  // Small copies for the grid; the viewer loads the full-size original.
+  thumb: "/gallery/thumbs/" + (index + 1) + ".webp",
   alt: "Match " + (index + 1),
 }));
 
@@ -40,7 +42,7 @@ export default function Gallery() {
                 dialog.current?.showModal();
               }}
             >
-              <img src={image.src} alt="" loading="lazy" decoding="async" />
+              <img src={image.thumb} alt="" loading="lazy" decoding="async" />
               <span className="thumb-overlay" aria-hidden="true">
                 <span className="thumb-index">{String(imageIndex + 1).padStart(2, "0")}</span>
                 <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round">

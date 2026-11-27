@@ -9,8 +9,8 @@ export const revealTransition: Transition = {
 };
 
 export const revealOnScroll = {
-  initial: { opacity: 0, y: 28, filter: "blur(6px)" },
-  whileInView: { opacity: 1, y: 0, filter: "blur(0px)" },
+  initial: { opacity: 0, y: 28 },
+  whileInView: { opacity: 1, y: 0 },
   viewport: { once: true, amount: 0.15 },
   transition: revealTransition,
 };
@@ -31,12 +31,11 @@ export const letterContainer: Variants = {
 };
 
 export const letter: Variants = {
-  hidden: { opacity: 0, y: "0.6em", rotateX: -70, filter: "blur(8px)" },
+  hidden: { opacity: 0, y: "0.6em", rotateX: -70 },
   visible: {
     opacity: 1,
     y: "0em",
     rotateX: 0,
-    filter: "blur(0px)",
     transition: { duration: 0.9, ease: easeOut },
   },
 };
