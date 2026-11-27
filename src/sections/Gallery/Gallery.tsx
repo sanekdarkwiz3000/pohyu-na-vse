@@ -11,9 +11,9 @@ const images = Array.from({ length: 16 }, (_, index) => ({
 }));
 
 const slide = {
-  enter: (direction: number) => ({ opacity: 0, x: direction * 80, scale: 0.97 }),
-  center: { opacity: 1, x: 0, scale: 1 },
-  exit: (direction: number) => ({ opacity: 0, x: direction * -80, scale: 0.97 }),
+  enter: (direction: number) => ({ opacity: 0, x: direction * 24 }),
+  center: { opacity: 1, x: 0 },
+  exit: (direction: number) => ({ opacity: 0, x: direction * -24 }),
 };
 
 export default function Gallery() {
@@ -31,7 +31,7 @@ export default function Gallery() {
 
       <ul className="gallery-grid">
         {images.map((image, imageIndex) => (
-          <motion.li key={image.src} {...staggeredReveal(imageIndex, 0.05)}>
+          <motion.li key={image.src} {...staggeredReveal(imageIndex)}>
             <button
               type="button"
               className="gallery-thumbnail"
@@ -43,12 +43,7 @@ export default function Gallery() {
               }}
             >
               <img src={image.thumb} alt="" loading="lazy" decoding="async" />
-              <span className="thumb-overlay" aria-hidden="true">
-                <span className="thumb-index">{String(imageIndex + 1).padStart(2, "0")}</span>
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round">
-                  <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
-                </svg>
-              </span>
+
             </button>
           </motion.li>
         ))}
@@ -90,7 +85,7 @@ export default function Gallery() {
                 initial="enter"
                 animate="center"
                 exit="exit"
-                transition={{ duration: 0.5, ease: easeOut }}
+                transition={{ duration: 0.45, ease: easeOut }}
                 drag="x"
                 dragConstraints={{ left: 0, right: 0 }}
                 dragElastic={0.6}

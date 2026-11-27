@@ -19,28 +19,22 @@ export default function BattleCup() {
           const victory = `Victory ${index + 1}`;
 
           return (
-            <motion.li key={matchId} {...staggeredReveal(index, 0.12)} className="battle-cup-card">
-              <span className="cup-number" aria-hidden="true">{String(index + 1).padStart(2, "0")}</span>
-              <span className="cup-shine" aria-hidden="true" />
-              <div className="cup-head">
-                <div>
-                  <p className="cup-kicker">The International Battle Cup</p>
-                  <h3>{victory}</h3>
-                  <p className="cup-match">Match #{matchId}</p>
-                </div>
-                <div className="battle-cup-trophy">
-                  <img src="/gallery/3.webp" alt="" width="1919" height="1079" loading="lazy" decoding="async" />
-                </div>
+            <motion.li key={matchId} {...staggeredReveal(index, 0.08)} className="battle-cup-card">
+              <div className="battle-cup-trophy">
+                <img src="/gallery/3.webp" alt="" width="1919" height="1079" loading="lazy" decoding="async" />
               </div>
+              <p className="cup-kicker">The International Battle Cup</p>
+              <h3>{victory}</h3>
+              <p className="cup-match">Match #{matchId}</p>
               <a
                 href={`https://www.dotabuff.com/matches/${matchId}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="primary-button"
+                className="text-link"
                 aria-label={`View on Dotabuff (${victory}, opens in a new tab)`}
               >
-                <img src="/dotabuff.png" alt="" width="18" height="18" />
-                <span>View on Dotabuff</span>
+                View on Dotabuff
+                <span aria-hidden="true">↗</span>
               </a>
             </motion.li>
           );
