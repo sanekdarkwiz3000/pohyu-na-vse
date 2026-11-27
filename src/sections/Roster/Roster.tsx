@@ -3,12 +3,12 @@ import { useEffect, useState } from "react";
 import PlayerCard from "../../components/PlayerCard/PlayerCard";
 import SectionHeading from "../../components/SectionHeading";
 import { players, type Player } from "../../data/players";
-import { revealOnScroll } from "../../motion";
+import { staggeredReveal } from "../../motion";
 
-const groups: { id: string; status: Player["status"]; label: string; title: string; subtitle?: string }[] = [
-  { id: "roster", status: "ACTIVE", label: "Our Squad", title: "Active Roster" },
-  { id: "legends", status: "LEGEND", label: "Eternal", title: "Legends", subtitle: "RIP Legends" },
-  { id: "legacy", status: "LEGACY", label: "Hall of Fame", title: "Legacy" },
+const groups: { id: string; status: Player["status"]; label: string; title: string; subtitle?: string; index: string }[] = [
+  { id: "roster", status: "ACTIVE", label: "Our Squad", title: "Active Roster", index: "01" },
+  { id: "legends", status: "LEGEND", label: "Eternal", title: "Legends", subtitle: "RIP Legends", index: "02" },
+  { id: "legacy", status: "LEGACY", label: "Hall of Fame", title: "Legacy", index: "03" },
 ];
 
 export default function Roster() {
@@ -33,16 +33,16 @@ export default function Roster() {
     return () => controller.abort();
   }, []);
 
-  return groups.map(({ id, status, label, title, subtitle }) => {
+  return groups.map(({ id, status, label, title, subtitle, index }) => {
     const members = players.filter((player) => player.status === status);
     if (members.length === 0 && status !== "ACTIVE") return null;
 
     return (
       <section key={id} id={id} aria-labelledby={id + "-title"} tabIndex={-1} className="section-shell" data-status={status}>
-        <SectionHeading id={id + "-title"} label={label} title={title} subtitle={subtitle} />
+        <SectionHeading id={id + "-title"} label={label} title={title} subtitle={subtitle} index={index} />
         <ul className="player-grid">
-          {members.map((player) => (
-            <motion.li key={player.id} {...revealOnScroll}>
+          {members.map((player, playerIndex) => (
+            <motion.li key={player.id} {...staggeredReveal(playerIndex)}>
               <PlayerCard player={player} steamAvatar={steamAvatars[player.id]} />
             </motion.li>
           ))}

@@ -1,40 +1,52 @@
 import { useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import SectionHeading from "../../components/SectionHeading";
-import { revealOnScroll } from "../../motion";
+import { easeOut, staggeredReveal } from "../../motion";
 
 const images = Array.from({ length: 16 }, (_, index) => ({
   src: "/gallery/" + (index + 1) + ".webp",
   alt: "Match " + (index + 1),
 }));
 
+const slide = {
+  enter: (direction: number) => ({ opacity: 0, x: direction * 80, scale: 0.97 }),
+  center: { opacity: 1, x: 0, scale: 1 },
+  exit: (direction: number) => ({ opacity: 0, x: direction * -80, scale: 0.97 }),
+};
+
 export default function Gallery() {
-  const [index, setIndex] = useState(0);
+  const [[index, direction], setState] = useState<[number, number]>([0, 0]);
   const dialog = useRef<HTMLDialogElement>(null);
   const selected = images[index];
 
-  const step = (direction: number) => {
-    setIndex((current) => (current + direction + images.length) % images.length);
+  const step = (delta: number) => {
+    setState(([current]) => [(current + delta + images.length) % images.length, delta]);
   };
 
   return (
     <section id="gallery" aria-labelledby="gallery-title" tabIndex={-1} className="section-shell">
-      <SectionHeading id="gallery-title" label="Moments" title="Gallery" />
+      <SectionHeading id="gallery-title" label="Moments" title="Gallery" index="05" />
 
       <ul className="gallery-grid">
         {images.map((image, imageIndex) => (
-          <motion.li key={image.src} {...revealOnScroll}>
+          <motion.li key={image.src} {...staggeredReveal(imageIndex, 0.05)}>
             <button
               type="button"
               className="gallery-thumbnail"
               aria-label={"View " + image.alt}
               aria-haspopup="dialog"
               onClick={() => {
-                setIndex(imageIndex);
+                setState([imageIndex, 0]);
                 dialog.current?.showModal();
               }}
             >
               <img src={image.src} alt="" loading="lazy" decoding="async" />
+              <span className="thumb-overlay" aria-hidden="true">
+                <span className="thumb-index">{String(imageIndex + 1).padStart(2, "0")}</span>
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round">
+                  <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
+                </svg>
+              </span>
             </button>
           </motion.li>
         ))}
@@ -56,7 +68,9 @@ export default function Gallery() {
       >
         <div className="gallery-viewer">
           <div className="gallery-toolbar">
-            <p aria-live="polite">{index + 1} / {images.length}</p>
+            <p aria-live="polite">
+              <strong>{String(index + 1).padStart(2, "0")}</strong> / {images.length}
+            </p>
             <button type="button" className="icon-button" aria-label="Close gallery" onClick={() => dialog.current?.close()}>
               <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" width="20" height="20">
                 <path d="m6 6 12 12M18 6 6 18" />
@@ -64,7 +78,33 @@ export default function Gallery() {
             </button>
           </div>
           <div className="gallery-image">
-            <img key={selected.src} src={selected.src} alt={selected.alt} loading="lazy" />
+            <AnimatePresence initial={false} custom={direction} mode="popLayout">
+              <motion.img
+                key={selected.src}
+                src={selected.src}
+                alt={selected.alt}
+                custom={direction}
+                variants={slide}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.5, ease: easeOut }}
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.6}
+                onDragEnd={(_, info) => {
+                  if (info.offset.x < -80) step(1);
+                  else if (info.offset.x > 80) step(-1);
+                }}
+                draggable={false}
+              />
+            </AnimatePresence>
+          </div>
+          <div className="gallery-progress" aria-hidden="true">
+            <motion.span
+              animate={{ scaleX: (index + 1) / images.length }}
+              transition={{ duration: 0.5, ease: easeOut }}
+            />
           </div>
           <div className="gallery-controls">
             <button type="button" className="icon-button" aria-label="Previous image" onClick={() => step(-1)}>
